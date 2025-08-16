@@ -11,7 +11,7 @@ import os
 import pandas as pd
 import json
 import requests
-def run():
+def etl():
     """ETL imdb movies dataset and save to /data"""
     data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
     os.makedirs(data_dir, exist_ok=True)

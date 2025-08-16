@@ -17,20 +17,25 @@ import datetime
 import itertools
 
 
-def run():
+def nc():
     """build actor graph and calculate centrality metrics"""
     data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
-    json_path = os.path.join(data_dir, "imdb_movies.json") 
+    csv_path = os.path.join(data_dir, "imdb_movies.csv") 
 
     #reload movies csv
-    df = pd.read_csv(json_path)
+    df = pd.read_csv(csv_path)
     # Build the graph
     g = nx.Graph()
 
     #go through actors 
     for index, row in df.iterrows():
         try:
-            actors = json.loads(row['actors'].replace("'", '"'))
+            actors = row['actors']
+            if pd.isna(actors) or actors.strip() == "":
+                continue #skip if actors is NaN or empty
+            actors = json.loads(actors.replace("'", '"'))
+            if len(actors) < 2: #need at least 2 actors to form an edge
+                continue
         except Exception:
             continue
 

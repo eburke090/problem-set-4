@@ -32,7 +32,7 @@ import datetime
 from sklearn.metrics import DistanceMetric
 from sklearn.metrics.pairwise import cosine_distances
 
-def run():
+def sag():
         """find similar actors by genre"""
         data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
         csv_path = os.path.join(data_dir, "imdb_movies.csv")
@@ -51,7 +51,7 @@ def run():
 
                 for actor_id, actor_name in actors:
                         for genre in genres:
-                                records.append({'actor_id': actor_id, 'actor_name': actor_name, 'genre': g})
+                                records.append({'actor_id': actor_id, 'actor_name': actor_name, 'genre': genre})
         df_records = pd.DataFrame(records)
 
         #actor-genre matrix
@@ -87,7 +87,7 @@ def run():
 
         print("[Similar Actors by Genre] Top 10 actors similar to Chris Hemsworth (nm1165110) by cosine distance:")
         for ind, row in top10.iterrows():
-                print(f"{ind[1]({ind[0]})}")
+                print(f"{ind[1]} ({ind[0]})")
 
         print(f"[Similar Actors by Genre] Results saved to {out_path}")
         print("[Similar Actors by Genre] Note: The list of similar actors may vary when using Euclidean distance due to the different ways these metrics capture similarity. Cosine distance focuses on the angle between vectors, making it sensitive to the distribution of genres, while Euclidean distance considers the absolute differences in genre counts, which can be influenced by the overall number of appearances.")
