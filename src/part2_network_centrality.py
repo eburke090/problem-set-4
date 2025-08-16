@@ -12,14 +12,62 @@ import numpy as np
 import pandas as pd
 import networkx as nx
 import json
+import os
+import datetime
+import itertools
 
-# Build the graph
-g = nx.Graph()
+
+def run():
+    """build actor graph and calculate centrality metrics"""
+    data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
+    json_path = os.path.join(data_dir, "imdb_movies.json") 
+
+    #reload movies csv
+    df = pd.read_csv(json_path)
+    # Build the graph
+    g = nx.Graph()
+
+    #go through actors 
+    for index, row in df.iterrows():
+        try:
+            actors = json.loads(row['actors'].replace("'", '"'))
+        except Exception:
+            continue
+
+        #add edges for all actor pairs in this movie
+        for (a1_id, a1_name), (a2_id, a2_name) in itertools.combinations(actors, 2):
+            if g.has_edge(a1_id, a2_id):
+                g[a1_id][a2_id]['weight'] += 1
+            else:
+                g.add_edge(a1_id, a2_id, weight=1)
+            
+            # Add actor names as node attributes
+            g.nodes[a1_id]['name'] = a1_name
+            g.nodes[a2_id]['name'] = a2_name
+        
+    print (f"[Centrality] Nodes: {len(g.nodes)}, Edges: {len(g.edges)}")
+
+    # Calculate centrality metrics
+    degree_cent = nx.degree_centrality(g)
+    top10 = sorted(degree_cent.items(), key=lambda x: x[1], reverse=True)[:10]
+    print("[Centrality] Top 10 most central actors by degree centrality:")
+    for actor_id, score in top10:
+        print(f"{g.nodes[actor_id]['name']} (ID: {actor_id}): {score:.4f}")
+
+    #save results as dataframe 
+    df_edges = nx.to_pandas_edgelist(g)
+    df_edges.rename(columns={'source': 'left_actor_id', 'target': 'right_actor_id'}, inplace=True)
+
+    #timestamped filename 
+    ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    out_path = os.path.join(data_dir, f'network_centrality_{ts}.csv')
+    df_edges.to_csv(out_path, index=False)
+    print(f"[Centrality] Edge list saved to {out_path}")
 
 # Set up your dataframe(s) -> the df that's output to a CSV should include at least the columns 'left_actor_name', '<->', 'right_actor_name'
 
 
-with open() as in_file:
+"""with open() as in_file:
     # Don't forget to comment your code
     for line in in_file:
         # Don't forget to include docstrings for all functions
@@ -54,3 +102,4 @@ print("Nodes:", len(g.nodes))
 
 # Output the final dataframe to a CSV named 'network_centrality_{current_datetime}.csv' to `/data`
 
+"""
